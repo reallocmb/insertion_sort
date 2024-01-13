@@ -1,3 +1,3 @@
 build:
-	cc -g `pkg-config --cflags gtk4` main.c -o selection_sort_animation `pkg-config --libs gtk4`
-	./selection_sort_animation
+	cc -g `pkg-config --cflags gtk4` main.c -o insertion_sort `pkg-config --libs gtk4`
+	./insertion_sort.exe

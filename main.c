@@ -11,13 +11,9 @@ uint32_t index_current = -1;
 uint32_t k_current = -1;
 
 uint64_t array[200] = {
-    15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22,
-    15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22,
-    15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22,
-    15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22,
-    15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22,
+    15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22, 77, 46, 58, 61
 };
-uint32_t array_count = 16 * 4;
+uint32_t array_count = 20;
 
 void array_append(uint64_t value)
 {
@@ -43,7 +39,7 @@ uint64_t array_higehst_value_get(void)
             highest_value = array[i];
     }
 
-    return highest_value * 1.1f;
+    return highest_value * 1.3;
 }
 
 void stuf_draw_func(GtkDrawingArea *drawing_area,
@@ -78,16 +74,12 @@ void stuf_draw_func(GtkDrawingArea *drawing_area,
     {
         if (i == index_current)
             cairo_set_source_rgba(cr, 0, 0, 255, 1);
-        else if (i == k_current)
+        else if (i == k_current - 1)
             cairo_set_source_rgba(cr, 150, 0, 0, 1);
         else
             cairo_set_source_rgba(cr, 0, 0, 0, 1);
 
-
-
         cairo_rectangle(cr, 5 + i * array_item_width, height - ((height - 5) * (double)(array[i] / (double)highest_value)), array_item_width, ((height - 5) * (double)(array[i] / (double)highest_value)));
-        printf("height: %d\n", height);
-        printf("test: %f\n", (height * (double)(array[i] / (double)highest_value)));
 
         sprintf(text, "%ld", array[i]);
         cairo_save(cr);
@@ -101,7 +93,6 @@ void stuf_draw_func(GtkDrawingArea *drawing_area,
         */
         cairo_stroke(cr);
     }
-    printf("draw\n");
 }
 
 void insertion_sort(GtkDrawingArea *drawing_area, uint64_t *array, uint32_t array_count)
@@ -136,7 +127,6 @@ void button_click_func(GtkWidget *widget, gpointer data)
 
 void button_click_insert_func(GtkWidget *widget, gpointer data)
 {
-    printf("insert \n");
     const char *text = gtk_entry_buffer_get_text(buffer);
     uint64_t value = 0;
     uint32_t i;
@@ -150,14 +140,14 @@ void button_click_insert_func(GtkWidget *widget, gpointer data)
     gtk_entry_buffer_set_text(buffer, "", 0);
 
     gtk_widget_queue_draw(data);
-    gtk_window_set_focus(window, entry);
+    gtk_window_set_focus((GtkWindow *)window, entry);
+
+    insertion_sort(data, array, array_count);
 }
 
 void button_click_delete_func(GtkWidget *widget, gpointer data)
 {
-    printf("delete\n");
     uint32_t i;
-    printf("%ld\n", (int64_t)index_current);
     if ((int64_t)index_current == 0xffffffff)
     {
         const char *text = gtk_entry_buffer_get_text(buffer);
@@ -190,12 +180,11 @@ void button_click_delete_func(GtkWidget *widget, gpointer data)
     gtk_entry_buffer_set_text(buffer, "", 0);
 
     gtk_widget_queue_draw(data);
-    gtk_window_set_focus(window, entry);
+    gtk_window_set_focus((GtkWindow *)window, entry);
 }
 
 void button_click_search_func(GtkWidget *widget, gpointer data)
 {
-    printf("search\n");
     const char *text = gtk_entry_buffer_get_text(buffer);
     uint64_t value = 0;
     uint32_t i;
@@ -216,7 +205,7 @@ void button_click_search_func(GtkWidget *widget, gpointer data)
     gtk_entry_buffer_set_text(buffer, "", 0);
 
     gtk_widget_queue_draw(data);
-    gtk_window_set_focus(window, entry);
+    gtk_window_set_focus((GtkWindow *)window, entry);
 }
 
 int main(int argc, char **argv)
