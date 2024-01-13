@@ -1,6 +1,7 @@
 #include<gtk/gtk.h>
 #include<gdk/gdkevents.h>
 #include<gtk-4.0/gdk/gdkevents.h>
+#include <stdlib.h>
 #include<unistd.h>
 
 GtkWidget *window;
@@ -10,14 +11,30 @@ GtkWidget *entry;
 uint32_t index_current = -1;
 uint32_t k_current = -1;
 
+#if 0
 uint64_t array[200] = {
     15, 18, 5, 20, 7, 66, 30, 4, 12, 88, 6, 1, 2, 17, 13, 22, 77, 46, 58, 61
 };
-uint32_t array_count = 20;
+#endif
+
+uint64_t *array;
+
+#define ARRAY_ALLOC_SIZE 400
+
+#define SORT_SPEED 500
+
+uint32_t array_count = 0;
 
 void array_append(uint64_t value)
 {
+    if (array_count % ARRAY_ALLOC_SIZE == 0)
+        array = realloc(array, (array_count + ARRAY_ALLOC_SIZE) * sizeof(*array));
     array[array_count++] = value;
+}
+
+uint64_t random_number_between(int64_t low, int64_t high)
+{
+    return rand() % (high - low + 1) + low;
 }
 
 void array_print(void)
@@ -95,7 +112,7 @@ void stuf_draw_func(GtkDrawingArea *drawing_area,
     }
 }
 
-void insertion_sort(GtkDrawingArea *drawing_area, uint64_t *array, uint32_t array_count)
+void *insertion_sort(void *data)
 {
     uint32_t tmp;
 
@@ -109,20 +126,26 @@ void insertion_sort(GtkDrawingArea *drawing_area, uint64_t *array, uint32_t arra
             array[k_current - 1] = tmp;
 
 
-            g_usleep(50000);
-            g_main_context_iteration(NULL, true);
-            gtk_widget_queue_draw((void *)drawing_area);
+            gtk_widget_queue_draw((GtkWidget *)data);
+            g_usleep(SORT_SPEED);
         }
     }
     k_current = -1;
     index_current = -1;
-    gtk_widget_queue_draw((void *)drawing_area);
+    gtk_widget_queue_draw((GtkWidget *)data);
+
+    return NULL;
 }
 
 
+#include<pthread.h>
 void button_click_func(GtkWidget *widget, gpointer data)
 {
-    insertion_sort(data, array, array_count);
+    GThread *thread = g_thread_new("thread", insertion_sort, data);
+    /*
+    insertion_sort(data);
+    */
+    g_thread_unref(thread);
 }
 
 void button_click_insert_func(GtkWidget *widget, gpointer data)
@@ -142,7 +165,9 @@ void button_click_insert_func(GtkWidget *widget, gpointer data)
     gtk_widget_queue_draw(data);
     gtk_window_set_focus((GtkWindow *)window, entry);
 
+    /*
     insertion_sort(data, array, array_count);
+    */
 }
 
 void button_click_delete_func(GtkWidget *widget, gpointer data)
@@ -257,6 +282,12 @@ int main(int argc, char **argv)
     gtk_window_set_child((GtkWindow *)window, vbox);
 
     gtk_window_present(GTK_WINDOW(window));
+
+    int32_t test = 150;
+    while (--test)
+    {
+        array_append(random_number_between(1, 800));
+    }
 
     GMainLoop *main_loop = g_main_loop_new(NULL, TRUE);
     g_main_loop_run(main_loop);
