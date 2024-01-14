@@ -1,3 +1,3 @@
 build:
-	cc -g `pkg-config --cflags gtk4` main.c -o insertion_sort `pkg-config --libs gtk4`
+	cc -g `pkg-config --cflags gtk4` insertion_sort.c -o insertion_sort `pkg-config --libs gtk4`
 	./insertion_sort
