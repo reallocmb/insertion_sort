@@ -21,7 +21,7 @@ uint64_t *array;
 
 #define ARRAY_ALLOC_SIZE 400
 
-#define SORT_SPEED 500
+#define SORT_SPEED 1
 
 uint32_t array_count = 0;
 
@@ -112,6 +112,12 @@ void stuf_draw_func(GtkDrawingArea *drawing_area,
     }
 }
 
+GSourceFunc update_drawing_callback(gpointer user_data)
+{
+    gtk_widget_queue_draw(GTK_WIDGET(user_data));
+    return G_SOURCE_REMOVE;
+}
+
 void *insertion_sort(void *data)
 {
     uint32_t tmp;
@@ -126,7 +132,7 @@ void *insertion_sort(void *data)
             array[k_current - 1] = tmp;
 
 
-            gtk_widget_queue_draw((GtkWidget *)data);
+            g_idle_add(update_drawing_callback, data);
             g_usleep(SORT_SPEED);
         }
     }
@@ -283,10 +289,10 @@ int main(int argc, char **argv)
 
     gtk_window_present(GTK_WINDOW(window));
 
-    int32_t test = 150;
+    int32_t test = 100;
     while (--test)
     {
-        array_append(random_number_between(1, 800));
+        array_append(random_number_between(1, 500000));
     }
 
     GMainLoop *main_loop = g_main_loop_new(NULL, TRUE);
